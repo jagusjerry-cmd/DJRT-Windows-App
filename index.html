@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101827">
+<title>DJRT | Invoice & Calculator</title>
+<style>
+:root{--bg:#f3f5f9;--ink:#172033;--muted:#697386;--line:#e4e8ef;--navy:#101827;--blue:#2563eb;--green:#0f9d72}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{background:linear-gradient(135deg,#101827,#233b62);color:#fff;padding:22px 18px 25px}
+.head{max-width:1050px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-size:26px;font-weight:850;letter-spacing:2px}.sub{font-size:12px;color:#c8d4e7;letter-spacing:1.5px}
+main{max-width:1050px;margin:20px auto;padding:0 14px 40px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px;margin-bottom:15px;box-shadow:0 5px 20px #17203308}
+h2{font-size:17px;margin:0 0 13px}.company{font-weight:750;font-size:18px}.address{font-size:12px;color:var(--muted)}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:15px}
+label{display:block;font-size:12px;color:var(--muted);font-weight:650;margin-bottom:5px}
+input{width:100%;min-width:0;border:1px solid #dce2eb;border-radius:9px;padding:11px 10px;font:inherit;color:var(--ink);background:#fff;outline:none}
+input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #2563eb18}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:650px}
+th{text-align:left;background:#f7f8fb;color:#596579;font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:10px 8px}
+td{border-bottom:1px solid var(--line);padding:7px 5px;vertical-align:middle}
+td input{padding:9px 7px;border-radius:7px}
+td.calc{font-weight:650;font-variant-numeric:tabular-nums;padding-left:9px}
+.sno{color:#8a93a3;font-size:12px;text-align:center}
+.remove{border:0;background:#fff0f0;color:#c24141;border-radius:7px;padding:7px 9px;font-size:17px;cursor:pointer}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+button{border:0;border-radius:10px;padding:11px 15px;font-weight:700;font-size:13px;cursor:pointer}
+.primary{background:var(--blue);color:#fff}.secondary{background:#edf2fb;color:#23416f}.dark{background:var(--navy);color:#fff}
+.totalbox{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#effaf6;border:1px solid #ccefe1;border-radius:13px;padding:15px 17px}
+.totalbox span{color:#26745d;font-weight:650}.grand{font-size:25px;font-weight:850;color:#087b58;font-variant-numeric:tabular-nums}
+.note{font-size:12px;color:var(--muted);margin:10px 2px 0}
+@media(max-width:600px){header{padding:18px 15px}.brand{font-size:23px}main{margin-top:13px;padding:0 10px 30px}.panel{padding:13px;border-radius:13px}.meta{gap:8px}.grand{font-size:21px}}
+@media print{body{background:#fff}header{background:#fff;color:#111;padding:0 0 12px}.sub{color:#555}main{max-width:none;margin:0;padding:0}.panel{box-shadow:none;border:0;padding:8px 0;margin:0 0 8px}.actions,.remove,.note{display:none!important}input{border:0;padding:4px 2px;appearance:none}th{background:#eee!important;color:#111}td{padding:5px 3px}.totalbox{background:#fff;border:1px solid #999;color:#111}.grand,.totalbox span{color:#111}}
+
+.header-tag{font-size:11px;font-weight:750;letter-spacing:1px;color:#d8e8ff;background:#ffffff18;border:1px solid #ffffff35;border-radius:999px;padding:8px 11px}
+.panel{border-top:3px solid #4f8df7}
+.panel:nth-of-type(2){border-top-color:#13b8a6}
+.panel:nth-of-type(3){border-top-color:#f59e0b}
+.panel:nth-of-type(4){border-top-color:#8b5cf6}
+th{background:linear-gradient(135deg,#edf4ff,#f4f0ff);color:#34466b}
+.primary{background:linear-gradient(135deg,#2563eb,#6d5dfc)}
+.secondary{background:#e8f8f5;color:#087b68}
+.dark{background:linear-gradient(135deg,#172033,#344b70)}
+.summary-stack{display:flex;flex-direction:column;gap:0;border:1px solid #dce6f4;border-radius:13px;overflow:hidden}
+.summary-line{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px;background:linear-gradient(100deg,#f0f6ff,#f8faff);border-bottom:1px solid #e1e8f3}
+.summary-line span,.summary-line label{font-size:12px;font-weight:800;letter-spacing:.65px;color:#52617b;margin:0}
+.summary-line strong{font-size:20px;color:#244fa5;font-variant-numeric:tabular-nums}
+.percent-line{display:block;background:linear-gradient(100deg,#fff7e9,#fffdf8)}
+.percent-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px}
+.percent-controls input{max-width:125px;background:#fff;border-color:#f2d6a6;font-weight:700}
+.percent-controls strong{color:#b66a08}
+.grand-line{background:linear-gradient(100deg,#e9fbf3,#f3fffa);border-bottom:0}
+.grand-line span{color:#087b58}.grand-line strong{font-size:25px;color:#087b58}
+@media(max-width:480px){.summary-line{padding:12px}.summary-line strong{font-size:18px}.grand-line strong{font-size:22px}.header-tag{font-size:9px}}
+@media print{.header-tag{color:#333;background:#fff;border-color:#aaa}.panel{border-top:0}.summary-line,.percent-line,.grand-line{background:#fff;border-color:#999}.summary-line strong,.percent-controls strong,.grand-line strong{color:#111}.percent-controls input{border:0;padding:3px}}
+
+/* DJRT premium invoice styling */
+:root{--bg:#eef3fb;--ink:#18243b;--line:#cbd8ea}
+body{background:radial-gradient(circle at 10% 0%,#e2edff 0,#f4f7fc 42%,#edf5f4 100%)}
+header{background:linear-gradient(120deg,#111c36 0%,#244b83 55%,#087e8b 100%);border-bottom:4px solid #f3b642}
+.brand{font-size:30px;letter-spacing:3px;text-shadow:0 2px 12px #0005}
+.sub{font-weight:700;letter-spacing:2px}
+.header-tag{background:linear-gradient(135deg,#ffffff25,#ffffff10);border:1px solid #ffffff65;color:#fff;box-shadow:0 4px 14px #0002}
+.panel{border:1px solid #cbd8eb;border-top:4px solid #3f78d5;border-radius:15px;box-shadow:0 8px 24px #1e3a5f12}
+.panel:nth-of-type(2){border-top-color:#12a58c}
+.panel:nth-of-type(3){border-top-color:#e6a12b}
+.panel:nth-of-type(4){border-top-color:#8262d9}
+h2{color:#1e3d6b}
+.meta{margin-top:0}
+.meta>div{background:#f8fbff;border:1px solid #d4e0f1;border-radius:11px;padding:10px}
+label{color:#4b5e7b;font-weight:800;letter-spacing:.35px}
+input{border:1.5px solid #c7d5e8;background:#fff;box-shadow:inset 0 1px 2px #1b37600a}
+input:focus{border-color:#3979d8;box-shadow:0 0 0 3px #3979d820}
+table{border:1px solid #cbd8e8;border-radius:10px;overflow:hidden}
+th{background:linear-gradient(120deg,#dceaff,#e8e3ff);color:#25436e;border:1px solid #c7d5e9;padding:12px 8px}
+td{border:1px solid #dce4ef;background:#fff}
+tbody tr:nth-child(even) td{background:#f8fbff}
+td input{border-color:#d7e0ed}
+.primary{background:linear-gradient(120deg,#2563eb,#6556d9);box-shadow:0 4px 10px #315fd32b}
+.secondary{background:linear-gradient(120deg,#dcf8ef,#dff5fb);border:1px solid #b7e6d8}
+.dark{background:linear-gradient(120deg,#172b4d,#176b78);box-shadow:0 4px 10px #153e6025}
+.remove{border:1px solid #ffd4d4}
+.summary-stack{border:2px solid #8daed8;box-shadow:0 5px 16px #1e477012}
+.summary-line{border-bottom:1px solid #d5e1f0}
+.summary-line:first-child{background:linear-gradient(100deg,#e8f1ff,#f5f8ff)}
+.percent-line{background:linear-gradient(100deg,#fff3d9,#fffaf0)}
+.grand-line{background:linear-gradient(100deg,#dff8ec,#edfff7);border-top:2px solid #8acdb0}
+.grand-line strong{color:#08784f}
+.print-title{display:none}
+@media print{
+ @page{size:A4;margin:12mm}
+ *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+ body{background:#edf3ff!important;color:#172033}
+ header{background:linear-gradient(120deg,#111c36 0%,#244b83 55%,#087e8b 100%)!important;color:#fff!important;border:0;border-bottom:5px solid #f3b642;padding:10px 14px}
+ .brand{color:#fff;text-shadow:0 2px 12px #0005;font-size:29px}
+ .sub,.header-tag{display:none!important}
+ main{max-width:none;margin:0;padding:0}
+ .print-title{display:block;text-align:center;font-size:32px;font-weight:950;letter-spacing:5px;color:#fff!important;background:linear-gradient(100deg,#244b83,#6556d9,#087e8b)!important;border:2px solid #f3b642;border-radius:8px;padding:10px;margin:12px 0 13px}
+ .panel{border:1.5px solid #91a9ce!important;border-radius:9px;box-shadow:none;padding:10px;margin:0 0 10px;break-inside:avoid;background:#fff!important}
+ .panel:nth-of-type(2){border-top:4px solid #12a58c!important}
+ .panel:nth-of-type(3){border-top:4px solid #e6a12b!important}
+ .meta>div{background:#f0f6ff!important;border:1.5px solid #91a9ce;padding:7px}
+ label{color:#263f68}
+ input{border:0!important;box-shadow:none!important;padding:3px 2px;background:transparent!important;color:#111}
+ table{min-width:0;border:1.5px solid #526f9b;border-collapse:collapse}
+ th{background:linear-gradient(120deg,#d7e8ff,#e5ddff)!important;color:#17365f!important;border:1px solid #829bc0!important}
+ td,tbody tr:nth-child(even) td{background:#f7faff!important;border:1px solid #b5c4da!important;color:#172033}
+ tbody tr:nth-child(odd) td{background:#fff!important}
+ td{padding:6px 4px}
+ .summary-stack{border:2px solid #7395c2;box-shadow:none}
+ .summary-line,.summary-line:first-child{background:linear-gradient(100deg,#e6f0ff,#f5f7ff)!important;border-bottom:1px solid #a8bbd8}
+ .percent-line{background:linear-gradient(100deg,#fff0d2,#fff9ed)!important}
+ .grand-line{background:linear-gradient(100deg,#d9f7e9,#eafff4)!important;border-top:2px solid #61b58d}
+ .summary-line span,.summary-line label{color:#24436e!important}
+ .summary-line strong{color:#244fa5!important}
+ .percent-controls strong{color:#b66a08!important}
+ .grand-line span,.grand-line strong{color:#08784f!important}
+ .actions,.remove,.note{display:none!important}
+}
+
+</style>
+</head>
+<body>
+<header><div class="head"><div><div class="brand">DJRT</div></div></div></header>
+<main>
+<div class="print-title">INVOICE</div>
+<section class="panel">
+ <div class="meta">
+  <div><label for="customer">CUSTOMER NAME</label><input id="customer" placeholder="Enter customer name"></div>
+  <div><label for="date">DATE</label><input id="date" type="text" inputmode="numeric" placeholder="Enter date" maxlength="10"></div>
+ </div>
+</section>
+<section class="panel">
+ <h2>Items & Calculation</h2>
+ <div class="tablewrap">
+ <table><thead><tr><th style="width:42px">S.No.</th><th>Items / Measurement</th><th style="width:100px">Quantity</th><th style="width:105px">Sq/Ft</th><th style="width:100px">Rate</th><th style="width:115px">Total (₹)</th><th style="width:42px"></th></tr></thead>
+ <tbody id="rows"></tbody></table>
+ </div>
+ <div class="actions">
+  <button class="primary" id="add">+ Add Item</button>
+  <button class="secondary" id="clear">Clear Items</button>
+  <button class="dark" id="print">Print / Save PDF</button>
+ </div>
+ <p class="note">Measurement examples: 22×78, 22x78, 9.25 ml, 25.5. For dimensions with ×, Sq/Ft = width × height ÷ 144 × quantity. For a single measurement, Sq/Ft = measurement × quantity. Enter an extra percentage below the Items Total (for example 12%); the app calculates that amount and adds it to the Items Total to show Grand Total.</p>
+</section>
+<section class="panel">
+ <div class="summary-stack">
+  <div class="summary-line"><span>ITEMS TOTAL</span><strong id="grand">₹0</strong></div>
+  <div class="summary-line percent-line">
+   <label for="extraPercent">ADD PERCENTAGE (%)</label>
+   <div class="percent-controls"><input id="extraPercent" type="number" min="0" step="any" value="0" inputmode="decimal"><strong id="percentAmount">₹0</strong></div>
+  </div>
+  <div class="summary-line grand-line"><span>GRAND TOTAL</span><strong id="finalGrand">₹0</strong></div>
+ </div>
+</section>
+</main>
+<script>
+const tbody=document.getElementById('rows');
+const money=n=>'₹'+(Number.isFinite(n)?Math.floor(n):0).toLocaleString('en-IN');
+function measureSqFt(raw,qty){
+ const s=String(raw||'').trim().toLowerCase().replaceAll('×','x').replace(/\s/g,'');
+ if(!s||!qty||!Number.isFinite(Number(qty))) return null;
+ const x=s.indexOf('x');
+ let base;
+ if(x>=0){
+   const a=Number(s.slice(0,x)),b=Number(s.slice(x+1));
+   if(!Number.isFinite(a)||!Number.isFinite(b)) return null;
+   base=a*b/144;
+ }else{
+   // Matches the workbook formula: use the number before the first space.
+   const token=String(raw).trim().split(/\s+/)[0];
+   const n=parseFloat(token);
+   if(!Number.isFinite(n)) return null;
+   base=n;
+ }
+ return base*Number(qty);
+}
+function recalc(){
+ let sum=0;
+ const trs=[...tbody.querySelectorAll('tr')];
+ trs.forEach((tr,i)=>{
+  tr.querySelector('.sno').textContent=i+1;
+  const item=tr.querySelector('.item').value,qty=Number(tr.querySelector('.qty').value),rate=Number(tr.querySelector('.rate').value);
+  const sqft=measureSqFt(item,qty);
+  tr.querySelector('.sqft').textContent=sqft===null?'—':sqft.toFixed(2);
+  const total=(sqft===null||tr.querySelector('.rate').value==='')?null:Math.floor(sqft*rate);
+  tr.querySelector('.line-total').textContent=total===null?'—':money(total);
+  if(total!==null&&Number.isFinite(total)) sum+=total;
+ });
+ const pctInput=document.getElementById('extraPercent');
+ const pct=Math.max(0,Number(pctInput.value)||0);
+ const pctAmount=Math.floor(sum*pct/100);
+ document.getElementById('grand').textContent=money(sum);
+ document.getElementById('percentAmount').textContent=money(pctAmount);
+ document.getElementById('finalGrand').textContent=money(sum+pctAmount);
+}
+function addRow(item='',qty='',rate=''){
+ const tr=document.createElement('tr');
+ tr.innerHTML=`<td class="sno"></td><td><input class="item" placeholder="e.g. 22×78" value=""></td><td><input class="qty" type="number" min="0" step="any" placeholder="0"></td><td class="calc sqft">—</td><td><input class="rate" type="number" min="0" step="any" placeholder="₹"></td><td class="calc line-total">—</td><td><button class="remove" title="Remove item" aria-label="Remove item">×</button></td>`;
+ tr.querySelector('.item').value=item;tr.querySelector('.qty').value=qty;tr.querySelector('.rate').value=rate;
+ tr.querySelectorAll('input').forEach(el=>el.addEventListener('input',recalc));
+ tr.querySelector('.remove').addEventListener('click',()=>{tr.remove();recalc()});
+ tbody.appendChild(tr);recalc();
+}
+document.getElementById('extraPercent').addEventListener('input',recalc);
+document.getElementById('add').addEventListener('click',()=>addRow());
+document.getElementById('clear').addEventListener('click',()=>{tbody.innerHTML='';for(let i=0;i<5;i++)addRow()});
+document.getElementById('print').addEventListener('click',()=>window.print());
+const now=new Date();
+document.getElementById('date').value=String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
+document.getElementById('date').addEventListener('input',e=>{
+ const digits=e.target.value.replace(/\D/g,'').slice(0,8);
+ if(digits.length>=5)e.target.value=digits.slice(0,2)+'/'+digits.slice(2,4)+'/'+digits.slice(4);
+ else if(digits.length>=3)e.target.value=digits.slice(0,2)+'/'+digits.slice(2);
+ else e.target.value=digits;
+});
+for(let i=0;i<5;i++)addRow();
+</script>
+</body></html>

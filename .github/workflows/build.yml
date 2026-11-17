@@ -24,7 +24,7 @@ jobs:
         run: npm install
 
       - name: Build Windows App
-        run: npx --yes electron-builder --win nsis portable
+        run: npx --yes electron-builder --win nsis portable --publish never
 
       - name: Upload Windows EXE
         uses: actions/upload-artifact@v4
